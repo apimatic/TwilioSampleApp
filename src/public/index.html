@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BirthdayBuzz - Automated Birthday Messages</title>
+  <style>
+    :root {
+      --primary: #6C5CE7;
+      --primary-light: #A29BFE;
+      --primary-dark: #4A3DB5;
+      --accent: #FD79A8;
+      --accent-light: #FDCB6E;
+      --success: #00B894;
+      --warning: #FDCB6E;
+      --danger: #E17055;
+      --bg: #0F0A1A;
+      --bg-card: #1A1230;
+      --bg-card-hover: #231845;
+      --bg-input: #251D3A;
+      --text: #F0ECFF;
+      --text-muted: #9B8FC2;
+      --text-dim: #6B5F8A;
+      --border: #352B54;
+      --shadow: 0 8px 32px rgba(108, 92, 231, 0.15);
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Animated background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 20% 50%, rgba(108,92,231,0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(253,121,168,0.06) 0%, transparent 50%),
+                  radial-gradient(circle at 50% 80%, rgba(253,203,110,0.04) 0%, transparent 50%);
+      animation: bgFloat 20s ease-in-out infinite;
+      z-index: -1;
+    }
+
+    @keyframes bgFloat {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(2%, -2%) rotate(1deg); }
+      66% { transform: translate(-1%, 1%) rotate(-0.5deg); }
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      padding: 48px 0 36px;
+      position: relative;
+    }
+
+    .logout-btn {
+      position: absolute;
+      top: 48px;
+      right: 0;
+      padding: 8px 18px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .logout-btn:hover {
+      background: var(--bg-card-hover);
+      color: var(--text);
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .logo {
+      font-size: 48px;
+      margin-bottom: 8px;
+    }
+
+    header h1 {
+      font-size: 36px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary-light), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 16px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .status-bar {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .status-pill {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 8px 20px;
+      border-radius: 50px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .status-dot.green { background: var(--success); box-shadow: 0 0 8px var(--success); }
+    .status-dot.yellow { background: var(--warning); }
+    .status-dot.red { background: var(--danger); }
+
+    /* Layout Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 32px;
+    }
+
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-title .icon {
+      font-size: 22px;
+    }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 15px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    .form-group input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+    }
+
+    .form-group input::placeholder {
+      color: var(--text-dim);
+    }
+
+    .form-hint {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    .phone-format {
+      font-size: 12px;
+      color: var(--success);
+      margin-top: 4px;
+      display: none;
+    }
+
+    .phone-format.visible { display: block; }
+    .phone-format.error { color: var(--danger); }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(108, 92, 231, 0.4);
+    }
+
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-sm {
+      padding: 6px 14px;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      background: var(--bg-card-hover);
+      color: var(--text);
+    }
+
+    .btn-accent {
+      background: linear-gradient(135deg, var(--accent), #e84393);
+      color: white;
+    }
+
+    .btn-accent:hover {
+      box-shadow: 0 4px 20px rgba(253, 121, 168, 0.4);
+    }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid rgba(225, 112, 85, 0.3);
+    }
+
+    .btn-danger:hover { background: rgba(225, 112, 85, 0.1); }
+
+    /* Contact List */
+    .contact-list {
+      list-style: none;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .contact-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .contact-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .contact-list::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+      background: var(--bg-input);
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .contact-item:hover {
+      border-color: var(--border);
+      background: var(--bg-card-hover);
+    }
+
+    .contact-info {
+      flex: 1;
+    }
+
+    .contact-name {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .contact-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      gap: 12px;
+    }
+
+    .contact-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-dim);
+    }
+
+    .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state p { font-size: 14px; }
+
+    /* Preview Modal */
+    .preview-box {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      margin-top: 12px;
+      position: relative;
+      display: none;
+    }
+
+    .preview-box.visible { display: block; }
+
+    .preview-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+
+    .preview-text {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    .preview-meta {
+      display: flex;
+      gap: 16px;
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .preview-note {
+      font-size: 11px;
+      color: var(--warning);
+      margin-top: 8px;
+      font-style: italic;
+    }
+
+    /* Timeline */
+    .timeline-full {
+      grid-column: 1 / -1;
+    }
+
+    .timeline {
+      list-style: none;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .timeline::-webkit-scrollbar { width: 6px; }
+    .timeline::-webkit-scrollbar-track { background: transparent; }
+    .timeline::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .timeline-item {
+      display: flex;
+      gap: 16px;
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+      background: var(--bg-input);
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .timeline-item:hover {
+      border-color: var(--border);
+    }
+
+    .timeline-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .timeline-icon.scheduled {
+      background: rgba(108, 92, 231, 0.15);
+      border: 1px solid rgba(108, 92, 231, 0.3);
+    }
+
+    .timeline-icon.sending {
+      background: rgba(253, 203, 110, 0.15);
+      border: 1px solid rgba(253, 203, 110, 0.3);
+    }
+
+    .timeline-icon.sent {
+      background: rgba(0, 184, 148, 0.15);
+      border: 1px solid rgba(0, 184, 148, 0.3);
+    }
+
+    .timeline-icon.delivered {
+      background: rgba(0, 184, 148, 0.2);
+      border: 1px solid rgba(0, 184, 148, 0.5);
+    }
+
+    .timeline-icon.failed {
+      background: rgba(225, 112, 85, 0.15);
+      border: 1px solid rgba(225, 112, 85, 0.3);
+    }
+
+    .timeline-icon.cancelled {
+      background: rgba(107, 95, 138, 0.15);
+      border: 1px solid rgba(107, 95, 138, 0.3);
+    }
+
+    .timeline-content { flex: 1; }
+
+    .timeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 6px;
+    }
+
+    .timeline-name {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .timeline-badge {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 50px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-scheduled { background: rgba(108, 92, 231, 0.2); color: var(--primary-light); }
+    .badge-sending { background: rgba(253, 203, 110, 0.2); color: var(--warning); }
+    .badge-sent { background: rgba(0, 184, 148, 0.2); color: var(--success); }
+    .badge-delivered { background: rgba(0, 184, 148, 0.3); color: #55efc4; }
+    .badge-failed { background: rgba(225, 112, 85, 0.2); color: var(--danger); }
+    .badge-cancelled { background: rgba(107, 95, 138, 0.2); color: var(--text-dim); }
+
+    .timeline-detail {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .timeline-message {
+      font-size: 13px;
+      color: var(--text-dim);
+      font-style: italic;
+      line-height: 1.5;
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: rgba(0,0,0,0.15);
+      border-radius: 8px;
+      border-left: 3px solid var(--primary);
+    }
+
+    .timeline-error {
+      font-size: 12px;
+      color: var(--danger);
+      margin-top: 6px;
+    }
+
+    /* Tab bar */
+    .tab-bar {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-input);
+      border-radius: var(--radius-sm);
+      padding: 4px;
+      margin-bottom: 20px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      background: transparent;
+    }
+
+    .tab:hover { color: var(--text); }
+
+    .tab.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 2px 8px rgba(108, 92, 231, 0.3);
+    }
+
+    /* Notifications */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast {
+      padding: 14px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      animation: slideIn 0.3s ease, fadeOut 0.3s ease 3.7s;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      max-width: 360px;
+    }
+
+    .toast.success {
+      background: linear-gradient(135deg, rgba(0,184,148,0.9), rgba(0,150,120,0.9));
+      color: white;
+    }
+
+    .toast.error {
+      background: linear-gradient(135deg, rgba(225,112,85,0.9), rgba(200,80,60,0.9));
+      color: white;
+    }
+
+    .toast.info {
+      background: linear-gradient(135deg, rgba(108,92,231,0.9), rgba(80,60,200,0.9));
+      color: white;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    /* Sparkle animation for sent messages */
+    @keyframes sparkle {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+
+    .sparkle { animation: sparkle 2s ease-in-out infinite; }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 30px;
+      color: var(--text-dim);
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .container { padding: 16px; }
+      header h1 { font-size: 28px; }
+      .card { padding: 20px; }
+      .status-bar { gap: 8px; }
+      .status-pill { padding: 6px 14px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <button class="logout-btn" id="logoutBtn" onclick="logout()">&#128275; Logout</button>
+      <div class="logo">&#127874;</div>
+      <h1>BirthdayBuzz</h1>
+      <p>Never forget a birthday again. Real SMS messages, automatically delivered with love.</p>
+      <div class="status-bar" id="statusBar">
+        <div class="status-pill">
+          <span class="status-dot" id="connectionDot"></span>
+          <span id="connectionText">Checking...</span>
+        </div>
+        <div class="status-pill">
+          <span>&#128101;</span>
+          <span id="contactCount">0</span> contacts
+        </div>
+        <div class="status-pill">
+          <span>&#128172;</span>
+          <span id="scheduledCount">0</span> upcoming
+        </div>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- Add Contact Card -->
+      <div class="card">
+        <div class="card-title">
+          <span class="icon">&#10024;</span>
+          Add Contact
+        </div>
+        <form id="addContactForm">
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" id="inputName" placeholder="Jane Smith" required maxlength="100" autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" id="inputPhone" placeholder="+1 (555) 123-4567" required autocomplete="off">
+            <div class="form-hint">Include country code for international numbers</div>
+            <div class="phone-format" id="phoneFormat"></div>
+          </div>
+          <div class="form-group">
+            <label>Birthday</label>
+            <input type="date" id="inputBirthday" required>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <span>&#127873;</span> Add Contact & Schedule
+          </button>
+        </form>
+
+        <!-- Message Preview -->
+        <div class="preview-box" id="previewBox">
+          <div class="preview-label">SMS Preview</div>
+          <div class="preview-text" id="previewText"></div>
+          <div class="preview-meta">
+            <span id="previewChars"></span>
+            <span id="previewSegments"></span>
+          </div>
+          <div class="preview-note" id="previewNote"></div>
+        </div>
+      </div>
+
+      <!-- Contacts Card -->
+      <div class="card">
+        <div class="card-title">
+          <span class="icon">&#128214;</span>
+          Your Contacts
+        </div>
+        <ul class="contact-list" id="contactList">
+          <li class="empty-state">
+            <div class="icon">&#128587;</div>
+            <p>No contacts yet. Add someone special!</p>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Timeline Card -->
+      <div class="card timeline-full">
+        <div class="card-title">
+          <span class="icon">&#128197;</span>
+          Message Timeline
+        </div>
+        <div class="tab-bar">
+          <button class="tab active" data-filter="all" onclick="filterTimeline('all', this)">All</button>
+          <button class="tab" data-filter="scheduled" onclick="filterTimeline('scheduled', this)">Upcoming</button>
+          <button class="tab" data-filter="sent" onclick="filterTimeline('sent', this)">Sent</button>
+          <button class="tab" data-filter="delivered" onclick="filterTimeline('delivered', this)">Delivered</button>
+          <button class="tab" data-filter="failed" onclick="filterTimeline('failed', this)">Failed</button>
+        </div>
+        <ul class="timeline" id="timeline">
+          <li class="loading"><div class="spinner"></div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    const API = '';
+    let currentFilter = 'all';
+
+    // ─── Auth Check ──────────────────────────────────────────
+    (async function checkAuth() {
+      try {
+        const res = await fetch(API + '/api/auth/status');
+        const data = await res.json();
+        if (!data.authenticated) {
+          window.location.href = '/login';
+          return;
+        }
+      } catch (e) {
+        window.location.href = '/login';
+      }
+    })();
+
+    async function logout() {
+      try {
+        await fetch(API + '/api/auth/logout', { method: 'POST' });
+      } catch (e) {
+        // ignore
+      }
+      window.location.href = '/login';
+    }
+
+    // ─── 401 Handler ─────────────────────────────────────────
+    function handleResponse(res) {
+      if (res.status === 401) {
+        window.location.href = '/login';
+        throw new Error('Not authenticated');
+      }
+      return res;
+    }
+
+    // ─── Toast Notifications ────────────────────────────────
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'toast ' + type;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+
+    // ─── Phone Number Live Formatting ───────────────────────
+    document.getElementById('inputPhone').addEventListener('input', function() {
+      const val = this.value.trim();
+      const el = document.getElementById('phoneFormat');
+      if (!val) {
+        el.className = 'phone-format';
+        return;
+      }
+      // Quick client-side preview
+      let cleaned = val.replace(/[^\d+]/g, '');
+      if (cleaned.startsWith('+') && cleaned.length >= 8) {
+        el.textContent = 'Format: ' + cleaned;
+        el.className = 'phone-format visible';
+      } else if (/^\d{10}$/.test(cleaned)) {
+        el.textContent = 'Format: +1' + cleaned + ' (US/CA assumed)';
+        el.className = 'phone-format visible';
+      } else if (val.length > 3) {
+        el.textContent = 'Include + and country code for best results';
+        el.className = 'phone-format visible error';
+      } else {
+        el.className = 'phone-format';
+      }
+    });
+
+    // ─── Preview on name input ──────────────────────────────
+    let previewTimeout;
+    document.getElementById('inputName').addEventListener('input', function() {
+      clearTimeout(previewTimeout);
+      const name = this.value.trim();
+      if (name.length < 2) {
+        document.getElementById('previewBox').classList.remove('visible');
+        return;
+      }
+      previewTimeout = setTimeout(() => fetchPreview(name), 300);
+    });
+
+    async function fetchPreview(name) {
+      try {
+        const res = await fetch(API + '/api/messages/preview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name }),
+        });
+        const data = await res.json();
+        if (data.preview) {
+          document.getElementById('previewText').textContent = data.preview;
+          document.getElementById('previewChars').textContent = data.charCount + ' chars';
+          document.getElementById('previewSegments').textContent = data.smsSegments + ' SMS segment(s)';
+          document.getElementById('previewNote').textContent = data.trialNote || '';
+          document.getElementById('previewBox').classList.add('visible');
+        }
+      } catch (e) {
+        console.error('Preview error:', e);
+      }
+    }
+
+    // ─── Add Contact Form ───────────────────────────────────
+    document.getElementById('addContactForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const name = document.getElementById('inputName').value.trim();
+      const phone = document.getElementById('inputPhone').value.trim();
+      const birthday = document.getElementById('inputBirthday').value;
+
+      if (!name || !phone || !birthday) {
+        showToast('Please fill in all fields.', 'error');
+        return;
+      }
+
+      try {
+        const res = await fetch(API + '/api/contacts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, phone, birthday }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showToast(data.error || 'Failed to add contact.', 'error');
+          return;
+        }
+
+        showToast(name + '\'s birthday message scheduled! ' + (data.phoneFormatted || ''), 'success');
+
+        // Reset form
+        this.reset();
+        document.getElementById('previewBox').classList.remove('visible');
+        document.getElementById('phoneFormat').className = 'phone-format';
+
+        // Refresh data
+        loadContacts();
+        loadTimeline();
+        loadStatus();
+      } catch (e) {
+        showToast('Network error. Please try again.', 'error');
+      }
+    });
+
+    // ─── Load Contacts ──────────────────────────────────────
+    async function loadContacts() {
+      try {
+        const res = handleResponse(await fetch(API + '/api/contacts'));
+        const contacts = await res.json();
+        const list = document.getElementById('contactList');
+
+        if (contacts.length === 0) {
+          list.innerHTML = '<li class="empty-state"><div class="icon">&#128587;</div><p>No contacts yet. Add someone special!</p></li>';
+          return;
+        }
+
+        list.innerHTML = contacts.map(c => {
+          const bdayParts = c.birthdayFull.split('-');
+          const bdayDisplay = new Date(parseInt(bdayParts[0]), parseInt(bdayParts[1])-1, parseInt(bdayParts[2]))
+            .toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          return '<li class="contact-item">' +
+            '<div class="contact-info">' +
+              '<div class="contact-name">&#127874; ' + escHtml(c.name) + '</div>' +
+              '<div class="contact-meta">' +
+                '<span>&#128222; ' + escHtml(c.phone) + '</span>' +
+                '<span>&#127873; ' + bdayDisplay + '</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="contact-actions">' +
+              '<button class="btn btn-sm btn-accent" onclick="sendNow(\'' + c.id + '\')">Send Now</button>' +
+              '<button class="btn btn-sm btn-danger" onclick="deleteContact(\'' + c.id + '\')">Remove</button>' +
+            '</div>' +
+          '</li>';
+        }).join('');
+      } catch (e) {
+        console.error('Load contacts error:', e);
+      }
+    }
+
+    // ─── Delete Contact ─────────────────────────────────────
+    async function deleteContact(id) {
+      if (!confirm('Remove this contact? Their scheduled messages will be cancelled.')) return;
+      try {
+        const res = await fetch(API + '/api/contacts/' + id, { method: 'DELETE' });
+        if (res.ok) {
+          showToast('Contact removed.', 'info');
+          loadContacts();
+          loadTimeline();
+          loadStatus();
+        } else {
+          showToast('Failed to remove contact.', 'error');
+        }
+      } catch (e) {
+        showToast('Network error.', 'error');
+      }
+    }
+
+    // ─── Send Now ───────────────────────────────────────────
+    async function sendNow(contactId) {
+      if (!confirm('Send a birthday message to this contact right now?')) return;
+      try {
+        const res = await fetch(API + '/api/messages/send-now', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contactId }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Message sent! Real SMS on its way.', 'success');
+        } else {
+          showToast(data.error || 'Failed to send message.', 'error');
+        }
+        loadTimeline();
+        loadStatus();
+      } catch (e) {
+        showToast('Network error.', 'error');
+      }
+    }
+
+    // ─── Load Timeline ──────────────────────────────────────
+    async function loadTimeline() {
+      try {
+        const res = handleResponse(await fetch(API + '/api/timeline'));
+        const items = await res.json();
+        renderTimeline(items);
+      } catch (e) {
+        console.error('Load timeline error:', e);
+      }
+    }
+
+    function renderTimeline(items) {
+      const list = document.getElementById('timeline');
+      let filtered = items;
+
+      if (currentFilter !== 'all') {
+        filtered = items.filter(m => m.status === currentFilter);
+      }
+
+      if (filtered.length === 0) {
+        list.innerHTML = '<li class="empty-state"><div class="icon">&#128172;</div><p>No messages to show.</p></li>';
+        return;
+      }
+
+      list.innerHTML = filtered.map(m => {
+        const icon = getStatusIcon(m.status);
+        const badge = getStatusBadge(m.status);
+        const dateStr = formatDate(m.scheduledFor);
+        const timeUntil = m.status === 'scheduled' ? getTimeUntil(m.scheduledFor) : '';
+
+        let detail = '';
+        if (m.status === 'scheduled') {
+          detail = '&#128197; Scheduled for ' + dateStr + (timeUntil ? ' (' + timeUntil + ')' : '');
+        } else if (m.status === 'sending') {
+          detail = '&#128225; Sending now...';
+        } else if (m.status === 'sent') {
+          detail = '&#9989; Sent ' + (m.sentAt ? formatDate(m.sentAt) : dateStr);
+        } else if (m.status === 'delivered') {
+          detail = '&#128230; Delivered ' + (m.deliveredAt ? formatDate(m.deliveredAt) : dateStr);
+        } else if (m.status === 'failed') {
+          detail = '&#10060; Failed ' + dateStr;
+        } else if (m.status === 'cancelled') {
+          detail = '&#128683; Cancelled';
+        }
+
+        let errorHtml = '';
+        if (m.errorMessage) {
+          errorHtml = '<div class="timeline-error">' + escHtml(m.errorMessage) + '</div>';
+        }
+
+        let cancelBtn = '';
+        if (m.status === 'scheduled') {
+          cancelBtn = '<button class="btn btn-sm btn-ghost" onclick="cancelMessage(\'' + m.id + '\')">Cancel</button>';
+        }
+
+        return '<li class="timeline-item">' +
+          '<div class="timeline-icon ' + m.status + '">' + icon + '</div>' +
+          '<div class="timeline-content">' +
+            '<div class="timeline-header">' +
+              '<span class="timeline-name">' + escHtml(m.contactName) + ' <span style="color:var(--text-dim);font-weight:400;font-size:12px">' + escHtml(m.phone) + '</span></span>' +
+              '<div style="display:flex;gap:6px;align-items:center">' + cancelBtn + '<span class="timeline-badge badge-' + m.status + '">' + badge + '</span></div>' +
+            '</div>' +
+            '<div class="timeline-detail">' + detail + '</div>' +
+            '<div class="timeline-message">' + escHtml(m.messageBody) + '</div>' +
+            errorHtml +
+          '</div>' +
+        '</li>';
+      }).join('');
+    }
+
+    async function cancelMessage(id) {
+      if (!confirm('Cancel this scheduled message?')) return;
+      try {
+        const res = await fetch(API + '/api/messages/' + id + '/cancel', { method: 'POST' });
+        if (res.ok) {
+          showToast('Message cancelled.', 'info');
+          loadTimeline();
+          loadStatus();
+        }
+      } catch (e) {
+        showToast('Network error.', 'error');
+      }
+    }
+
+    function filterTimeline(filter, btn) {
+      currentFilter = filter;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      loadTimeline();
+    }
+
+    // ─── Status ─────────────────────────────────────────────
+    async function loadStatus() {
+      try {
+        const res = handleResponse(await fetch(API + '/api/status'));
+        const data = await res.json();
+        const dot = document.getElementById('connectionDot');
+        const text = document.getElementById('connectionText');
+
+        if (data.twilioConfigured) {
+          dot.className = 'status-dot green';
+          text.textContent = data.accountSid ? 'Connected: ' + data.accountSid : 'Live SMS Active';
+        } else {
+          dot.className = 'status-dot yellow';
+          text.textContent = 'Demo Mode';
+        }
+
+        document.getElementById('contactCount').textContent = data.contactCount;
+        document.getElementById('scheduledCount').textContent = data.scheduledCount;
+      } catch (e) {
+        const dot = document.getElementById('connectionDot');
+        const text = document.getElementById('connectionText');
+        dot.className = 'status-dot red';
+        text.textContent = 'Disconnected';
+      }
+    }
+
+    // ─── Helpers ─────────────────────────────────────────────
+    function escHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function getStatusIcon(status) {
+      const icons = {
+        scheduled: '&#128197;',
+        sending: '&#128640;',
+        sent: '&#9989;',
+        delivered: '&#127881;',
+        failed: '&#128165;',
+        cancelled: '&#128683;'
+      };
+      return icons[status] || '&#128172;';
+    }
+
+    function getStatusBadge(status) {
+      const labels = {
+        scheduled: 'Scheduled',
+        sending: 'Sending',
+        sent: 'Sent',
+        delivered: 'Delivered',
+        failed: 'Failed',
+        cancelled: 'Cancelled'
+      };
+      return labels[status] || status;
+    }
+
+    function formatDate(isoStr) {
+      const d = new Date(isoStr);
+      return d.toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric',
+        hour: 'numeric', minute: '2-digit'
+      });
+    }
+
+    function getTimeUntil(isoStr) {
+      const diff = new Date(isoStr).getTime() - Date.now();
+      if (diff < 0) return 'due now';
+      const days = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      if (days > 30) {
+        const months = Math.floor(days / 30);
+        return months + ' month' + (months > 1 ? 's' : '') + ' away';
+      }
+      if (days > 0) return days + ' day' + (days > 1 ? 's' : '') + ' away';
+      if (hours > 0) return hours + ' hour' + (hours > 1 ? 's' : '') + ' away';
+      return 'less than an hour';
+    }
+
+    // ─── Auto-refresh ───────────────────────────────────────
+    setInterval(() => {
+      loadTimeline();
+      loadStatus();
+    }, 15000);
+
+    // ─── Init ───────────────────────────────────────────────
+    loadStatus();
+    loadContacts();
+    loadTimeline();
+  </script>
+</body>
+</html>

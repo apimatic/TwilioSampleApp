@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BirthdayBuzz - Connect Your Twilio Account</title>
+  <style>
+    :root {
+      --primary: #6C5CE7;
+      --primary-light: #A29BFE;
+      --primary-dark: #4A3DB5;
+      --accent: #FD79A8;
+      --accent-light: #FDCB6E;
+      --success: #00B894;
+      --warning: #FDCB6E;
+      --danger: #E17055;
+      --bg: #0F0A1A;
+      --bg-card: #1A1230;
+      --bg-card-hover: #231845;
+      --bg-input: #251D3A;
+      --text: #F0ECFF;
+      --text-muted: #9B8FC2;
+      --text-dim: #6B5F8A;
+      --border: #352B54;
+      --shadow: 0 8px 32px rgba(108, 92, 231, 0.15);
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 20% 50%, rgba(108,92,231,0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(253,121,168,0.06) 0%, transparent 50%),
+                  radial-gradient(circle at 50% 80%, rgba(253,203,110,0.04) 0%, transparent 50%);
+      animation: bgFloat 20s ease-in-out infinite;
+      z-index: -1;
+    }
+
+    @keyframes bgFloat {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(2%, -2%) rotate(1deg); }
+      66% { transform: translate(-1%, 1%) rotate(-0.5deg); }
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 460px;
+      padding: 24px;
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .logo {
+      font-size: 56px;
+      margin-bottom: 8px;
+    }
+
+    .login-header h1 {
+      font-size: 36px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary-light), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    .login-header p {
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .login-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      box-shadow: var(--shadow);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 15px;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    .form-group input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+    }
+
+    .form-group input::placeholder {
+      color: var(--text-dim);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .form-hint {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    .btn {
+      padding: 14px 24px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(108, 92, 231, 0.4);
+    }
+
+    .btn-primary:active:not(:disabled) { transform: translateY(0); }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .error-box {
+      background: rgba(225, 112, 85, 0.1);
+      border: 1px solid rgba(225, 112, 85, 0.3);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: var(--danger);
+      display: none;
+    }
+
+    .error-box.visible { display: block; }
+
+    .help-section {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .help-section h3 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .help-steps {
+      list-style: none;
+      counter-reset: steps;
+    }
+
+    .help-steps li {
+      counter-increment: steps;
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.6;
+      padding-left: 28px;
+      position: relative;
+      margin-bottom: 8px;
+    }
+
+    .help-steps li::before {
+      content: counter(steps);
+      position: absolute;
+      left: 0;
+      top: 1px;
+      width: 20px;
+      height: 20px;
+      background: rgba(108, 92, 231, 0.15);
+      border: 1px solid rgba(108, 92, 231, 0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--primary-light);
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 480px) {
+      .login-container { padding: 16px; }
+      .login-header h1 { font-size: 28px; }
+      .login-card { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-header">
+      <div class="logo">&#127874;</div>
+      <h1>BirthdayBuzz</h1>
+      <p>Connect your Twilio account to start sending automated birthday messages with real SMS.</p>
+    </div>
+
+    <div class="login-card">
+      <div class="error-box" id="errorBox"></div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label>Account SID</label>
+          <input type="password" id="accountSid" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" required autocomplete="off" spellcheck="false">
+          <div class="form-hint">Starts with "AC", found on your Twilio Console dashboard</div>
+        </div>
+
+        <div class="form-group">
+          <label>Auth Token</label>
+          <input type="password" id="authToken" placeholder="Your auth token" required autocomplete="off">
+          <div class="form-hint">Found next to your Account SID on the dashboard</div>
+        </div>
+
+        <div class="form-group">
+          <label>Messaging Service SID</label>
+          <input type="password" id="messagingServiceSid" placeholder="MGxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" required autocomplete="off" spellcheck="false">
+          <div class="form-hint">Found under Messaging > Services in Twilio Console</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="connectBtn">
+          <span id="btnText">Connect to Twilio</span>
+        </button>
+      </form>
+
+      <div class="help-section">
+        <h3>Where to find your credentials</h3>
+        <ol class="help-steps">
+          <li>Log in to your Twilio Console</li>
+          <li>Your Account SID and Auth Token are on the main dashboard</li>
+          <li>For Messaging Service SID, go to Messaging > Services and copy the SID</li>
+          <li>If you don't have a Messaging Service yet, create one and add a phone number to it</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Check if already authenticated
+    (async function checkAuth() {
+      try {
+        const res = await fetch('/api/auth/status');
+        const data = await res.json();
+        if (data.authenticated) {
+          window.location.href = '/';
+        }
+      } catch (e) {
+        // Not authenticated, stay on login page
+      }
+    })();
+
+    const form = document.getElementById('loginForm');
+    const errorBox = document.getElementById('errorBox');
+    const connectBtn = document.getElementById('connectBtn');
+    const btnText = document.getElementById('btnText');
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      errorBox.classList.remove('visible');
+
+      const accountSid = document.getElementById('accountSid').value.trim();
+      const authToken = document.getElementById('authToken').value.trim();
+      const messagingServiceSid = document.getElementById('messagingServiceSid').value.trim();
+
+      if (!accountSid || !authToken || !messagingServiceSid) {
+        showError('Please fill in all fields.');
+        return;
+      }
+
+      // Show loading state
+      connectBtn.disabled = true;
+      btnText.innerHTML = '<span class="spinner"></span> Connecting...';
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ accountSid, authToken, messagingServiceSid }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          btnText.textContent = 'Connected! Redirecting...';
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 500);
+        } else {
+          showError(data.error || 'Failed to connect. Please check your credentials.');
+          resetBtn();
+        }
+      } catch (err) {
+        showError('Network error. Please check your connection and try again.');
+        resetBtn();
+      }
+    });
+
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.classList.add('visible');
+    }
+
+    function resetBtn() {
+      connectBtn.disabled = false;
+      btnText.textContent = 'Connect to Twilio';
+    }
+  </script>
+</body>
+</html>
