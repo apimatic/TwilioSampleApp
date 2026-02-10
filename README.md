@@ -33,8 +33,8 @@ A beautiful web application that lets you manage contacts and automatically send
 
 ```bash
 # Clone the repository
-git clone https://github.com/apimatic/TwilioSampleApp.git
-cd TwilioSampleApp
+git clone https://github.com/apimatic/twilio-sample-app.git
+cd twilio-sample-app
 
 # Install dependencies
 npm install
