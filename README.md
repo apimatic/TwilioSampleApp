@@ -89,6 +89,6 @@ This application was generated using Claude Code (CLI) with the APIMatic MCP Ser
 
 ## Resources
 
-- [APIMatic Portal for Twilio APIs](https://www.apimatic.io/api-docs/twilio-apis)
+- [APIMatic Portal for Twilio APIs](https://twillo-poc-apimatic.pages.dev/)
 - [Twilio Console](https://www.twilio.com/console)
 - [Twilio Notify API Docs](https://www.twilio.com/docs/notify)
