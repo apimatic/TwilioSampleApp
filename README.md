@@ -60,7 +60,7 @@ A node-cron scheduler runs every minute in the background, checking for messages
 
 ## AI Generation Details
 
-This application was generated using Claude Code (CLI) with the APIMatic MCP Server for Twilio APIs.
+This application was generated using Claude Code (CLI) with APIMatics Context Plugin for Twilio APIs.
 
 ### Prompt Used
 
@@ -85,7 +85,7 @@ This application was generated using Claude Code (CLI) with the APIMatic MCP Ser
 | API Client | APIMatic-generated Twilio SDK (`twilio-api-sdk-sdk`) |
 | Scheduling | node-cron |
 | Sessions | express-session (in-memory) |
-| AI Assistant | Claude Code with APIMatic MCP Server |
+| AI Assistant | Claude Code with APIMatics Context Plugin |
 
 ## Resources
 
