@@ -12,6 +12,24 @@ A beautiful web application that lets you manage contacts and automatically send
 
 ![Message Timeline](docs/images/message_timeline.png)
 
+## Generating this app with Context Plugins
+
+This application was generated using Claude Code (CLI) with APIMatics Context Plugin for Twilio APIs.
+
+### Prompt Used
+
+![Prompt](docs/images/prompt.png)
+
+> /acp-twilio-apis-ts:integrate_api (MCP) Create a web app that lets users enter a list of contacts with name, phone number, and birthday, then schedules a personalized "Happy Birthday" text message to be sent automatically on the morning of each contact's birthday every year. Validate and format phone numbers into E.164 format, clearly handling international numbers. Allow users to preview the exact SMS message before scheduling, with safe name interpolation. Use Twilio's native message scheduling to create scheduled SMS messages with a fixed send time in ISO 8601 format, and ensure the app works correctly on a Twilio free trial by handling verified recipient numbers, trial message prefixes, and geographic restrictions. Display a clear message lifecycle in the UI showing when each message is scheduled, sent, delivered, or failed using delivery status updates. Include a simple activity or timeline view so users can see upcoming birthday messages and recent delivery results. Design the interface to feel delightful and magical, emphasizing that real SMS messages are being sent to real phones, and use your own branding without referencing Twilio directly in the UI.
+
+### Time Investment
+
+| Phase | Time |
+|-------|------|
+| Initial generation | ~15 minutes |
+| Testing and iteration | ~45 minutes |
+| **Total** | **~1.25 hours** |
+
 ## Features
 
 - **Secure Credential Login** - Connect your own Twilio account via a login page. Credentials are masked and stored only in-memory for the session.
@@ -57,24 +75,6 @@ BirthdayBuzz is a full-stack Node.js application with an Express backend and a s
 The core workflow revolves around three Twilio Notify API endpoints accessed through the SDK: `NotifyV1ServiceApi` for creating and managing the Notify Service, `NotifyV1BindingApi` for registering SMS bindings for each contact's phone number, and `NotifyV1NotificationApi` for dispatching birthday notifications via the `toBinding` parameter. Phone numbers are validated and normalized to E.164 format with automatic country code detection for 40+ countries.
 
 A node-cron scheduler runs every minute in the background, checking for messages whose scheduled time has passed. When a birthday arrives, the scheduler picks up the first active session's Twilio client, sends the SMS, and updates the message status in real time. The frontend auto-refreshes every 15 seconds to reflect delivery status changes, giving users a live view of their message lifecycle.
-
-## AI Generation Details
-
-This application was generated using Claude Code (CLI) with APIMatics Context Plugin for Twilio APIs.
-
-### Prompt Used
-
-![Prompt](docs/images/prompt.png)
-
-> /acp-twilio-apis-ts:integrate_api (MCP) Create a web app that lets users enter a list of contacts with name, phone number, and birthday, then schedules a personalized "Happy Birthday" text message to be sent automatically on the morning of each contact's birthday every year. Validate and format phone numbers into E.164 format, clearly handling international numbers. Allow users to preview the exact SMS message before scheduling, with safe name interpolation. Use Twilio's native message scheduling to create scheduled SMS messages with a fixed send time in ISO 8601 format, and ensure the app works correctly on a Twilio free trial by handling verified recipient numbers, trial message prefixes, and geographic restrictions. Display a clear message lifecycle in the UI showing when each message is scheduled, sent, delivered, or failed using delivery status updates. Include a simple activity or timeline view so users can see upcoming birthday messages and recent delivery results. Design the interface to feel delightful and magical, emphasizing that real SMS messages are being sent to real phones, and use your own branding without referencing Twilio directly in the UI.
-
-### Time Investment
-
-| Phase | Time |
-|-------|------|
-| Initial generation | ~15 minutes |
-| Testing and iteration | ~45 minutes |
-| **Total** | **~1.25 hours** |
 
 ## Tech Stack
 
